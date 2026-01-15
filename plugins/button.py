@@ -16,7 +16,9 @@ from plugins.functions.display_progress import progress_for_pyrogram, humanbytes
 from plugins.database.database import db
 from PIL import Image
 from plugins.functions.ran_text import random_char
+
 cookies_file = 'cookies.txt'
+
 # Set up logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -25,15 +27,16 @@ logging.getLogger("pyrogram").setLevel(logging.WARNING)
 
 async def youtube_dl_call_back(bot, update):
     cb_data = update.data
+    
+    # Fix: Safe unpacking (handle extra values + missing data)
     split_data = cb_data.split("|")
-
-# Check if we have at least 4 values (fix "too few" errors too)
-if len(split_data) < 4:
-    await update.answer("⚠️ Invalid request: Missing data!")
-    return  # Exit to avoid crash
-
-# Unpack first 4 values (ignore extra ones with *_ )
-tg_send_type, youtube_dl_format, youtube_dl_ext, ranom, *_ = split_data
+    if len(split_data) < 4:
+        await update.answer("⚠️ Invalid request: Missing callback data!")
+        await update.message.delete()
+        return False
+    # Unpack first 4 values, ignore extras with *_
+    tg_send_type, youtube_dl_format, youtube_dl_ext, ranom, *_ = split_data
+    
     random1 = random_char(5)
     
     save_ytdl_json_path = os.path.join(Config.DOWNLOAD_LOCATION, f"{update.from_user.id}{ranom}.json")
@@ -65,7 +68,7 @@ tg_send_type, youtube_dl_format, youtube_dl_ext, ranom, *_ = split_data
                     o = entity.offset
                     l = entity.length
                     youtube_dl_url = youtube_dl_url[o:o + l]
-                    
+        
         youtube_dl_url = youtube_dl_url.strip()
         custom_file_name = custom_file_name.strip()
         if youtube_dl_username:
@@ -176,7 +179,7 @@ tg_send_type, youtube_dl_format, youtube_dl_ext, ranom, *_ = split_data
         if os.path.isfile(download_directory):
             file_size = os.stat(download_directory).st_size
         else:
-            download_directory = os.path.splitext(download_directory)[0] + "." + ".mkv"
+            download_directory = os.path.splitext(download_directory)[0] + ".mkv"
             if os.path.isfile(download_directory):
                 file_size = os.stat(download_directory).st_size
             else:
