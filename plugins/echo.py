@@ -102,7 +102,8 @@ async def echo(bot, update):
         )
         return
 
-    if update.from_user.id not in Config.OWNER_ID:
+    # Direct check for single owner ID (no iteration needed)
+    if update.from_user.id != Config.OWNER_ID:
         if not await check_verification(bot, update.from_user.id) and Config.TRUE_OR_FALSE:
             buttons = [
                 [
