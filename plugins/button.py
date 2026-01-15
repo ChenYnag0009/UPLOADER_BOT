@@ -25,7 +25,15 @@ logging.getLogger("pyrogram").setLevel(logging.WARNING)
 
 async def youtube_dl_call_back(bot, update):
     cb_data = update.data
-    tg_send_type, youtube_dl_format, youtube_dl_ext, ranom = cb_data.split("|")
+    split_data = cb_data.split("|")
+
+# Check if we have at least 4 values (fix "too few" errors too)
+if len(split_data) < 4:
+    await update.answer("⚠️ Invalid request: Missing data!")
+    return  # Exit to avoid crash
+
+# Unpack first 4 values (ignore extra ones with *_ )
+tg_send_type, youtube_dl_format, youtube_dl_ext, ranom, *_ = split_data
     random1 = random_char(5)
     
     save_ytdl_json_path = os.path.join(Config.DOWNLOAD_LOCATION, f"{update.from_user.id}{ranom}.json")
